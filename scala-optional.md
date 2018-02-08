@@ -54,6 +54,8 @@ I could have used a trick and return `-1` in these cases like the JavaScript `in
 
 Fortunately, I don't have to. Indeed, Scala provides a cool built-in feature that JavaScript does not have: the `Option` class !
 
+_NB: In fact, the `indexOf` implementation from the `scala.collection.immutable.List` does not return an `Option[Int]` but an `Int` (with `-1` return value when element not in list, just like the Javascript implementation). Why ? To preserve Java interoperability and for performance reasons._
+
 ## What is an __Option__ ?
 
 `Option` is a structure that represents something that may or may not exist, something optional. It can either hold a value or no value.
@@ -133,7 +135,7 @@ The `indexOf` method will no longer return an `Int` but an `Option[Int]`.
 def indexOf(element: Int, list: List[Int]): Option[Int]
 ```
 
-and the test cases become:
+and because we need the function to have a meaningful return value when the element is not found in the list, the test cases become:
 
 ```scala
 scala> indexOf(3, List(1, 2, 3, 4))
@@ -153,30 +155,65 @@ res4: Option[Int] = None
 ```
 
 ## Implementations
-
-### Version 1
-Using pattern matching (not on the `Option`).
-```scala
-def indexOf(element: Int, list: List[Int]): Option[Int] = {
-  val filteredElementsWithIndex = list.zipWithIndex.filter(_._1 == element)
-  filteredElementsWithIndex.length match {
-    case 0 => None
-    case _ => Some(f.head._2)
-  }
-}
-```
-### Version 2
-Using the `find` function (see documentation [here](http://www.scala-lang.org/api/current/scala/collection/immutable/List.html)) that already returns an `Option` then using `map` (which preserve the optional nature as explained earlier).
-```scala
-def indexOf(element: Int, list: List[Int]): Option[Int] = {
-  list.zipWithIndex.find(_._1 == element).map(_._2)
-}
-```
-
-_NB: The `zipWithIndex` takes a list and zip each element with its index (see documentation [here](http://www.scala-lang.org/api/current/scala/collection/immutable/List.html)):_
+Each one of the implementations below use the `zipWithIndex` method.
+The `zipWithIndex` method returns a new list containing pairs consisting of all elements of the list paired with their index (see documentation [here](http://www.scala-lang.org/api/current/scala/collection/immutable/List.html)):
 ```scala
 scala> List(23, 11, 18, 10).zipWithIndex
 res0: List[(Int, Int)] = List((23,0), (11,1), (18,2), (10,3))
 ```
+
+
+
+### Version 1
+Using the `headOption` function (see documentation [here](http://www.scala-lang.org/api/current/scala/collection/immutable/List.html)) that returns an `Option` wrapping the first element of a list if it exists then using `map` (which preserve the optional nature as explained earlier).
+```scala
+def indexOf(element: Int, list: List[Int]): Option[Int] = {
+  list.zipWithIndex
+    .filter(_._1 == element)
+    .headOption
+    .map(_._2)
+}
+```
+
+### Version 2
+Using the `find` function (see documentation [here](http://www.scala-lang.org/api/current/scala/collection/immutable/List.html)) that already returns an `Option` then using `map`.
+```scala
+def indexOf(element: Int, list: List[Int]): Option[Int] = {
+  list.zipWithIndex
+    .find(_._1 == element)
+    .map(_._2)
+}
+```
+
+### Version 3
+Using pattern matching to check for the element existence.
+```scala
+def indexOf(element: Int, list: List[Int]): Option[Int] = {
+  val filteredElementsWithIndex = list.zipWithIndex
+                                      .filter(_._1 == element)
+  filteredElementsWithIndex match {
+    case List() => None
+    case head :: _ => Some(head._2)
+  }
+}
+```
+
+## Option type in others languages
+> - In Agda, it is named `Maybe` with variants `nothing` and `just a`.
+> - In C++17 it is defined as the template class `std::optional<T>`.
+> - In C#, it is defined as `Nullable<T>` but is generally written as `T?`.
+> - In Coq, it is defined as `Inductive option (A:Type) : Type := | Some : A -> option A | None : option A.`.
+> - In Haskell, it is named `Maybe`, and defined as `data Maybe a = Nothing | Just a`.
+> - In Idris, it is defined as `data Maybe a = Nothing | Just a`.
+> - In Java, since version 8, it is defined as parameterized `final class Optional<T>`.
+> - In Julia, it is named `Nullable{T}`.
+> - In Kotlin, it is defined as `T?`.[1]
+> - In OCaml, it is defined as `type 'a option = None | Some of 'a`.
+> - In Perl 6, this is the default, but you can add a `:D` "smiley" to opt into a non option type.
+> - In Rust, it is defined as `enum Option<T> { None, Some(T) }`.
+> - In Standard ML, it is defined as `datatype 'a option = NONE | SOME of 'a`.
+> - In Swift, it is defined as `enum Optional<T> { case none, some(T) }` but is generally written as `T?`.
+>
+> Source: [Wikipedia](https://en.wikipedia.org/wiki/Option_type)
 
 [Go back](./)
