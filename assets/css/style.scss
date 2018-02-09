@@ -8,3 +8,8 @@ $section-headings-color: #3A67A9;
 $body-link-color: #FF9900;
 
 @import "{{ site.theme }}";
+
+.highlight .o {
+  color: #FF9900;
+  font-weight: bold;
+}
