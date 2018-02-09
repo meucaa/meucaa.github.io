@@ -2,7 +2,7 @@
 layout: default
 ---
 
-# Scala: Options are not optional
+# Scala: Using Option is not optional
 
 ## Context
 
