@@ -126,6 +126,28 @@ res0: Boolean = false
 scala> noValue.isEmpty
 res1: Boolean = true
 ```
+Two others methods can be used to achieve the same test : 
+- `isDefined` (will return `true` if the `Option` is an instance of `scala.Some`)
+- `nonEmpty` (will return `false` if the `Option` is an instance of `None` )
+
+
+
+If you need to check what's in an `Option` but only if it contains a value, you can use the `exists` method as follows:
+
+```scala
+def isEven(n: Int): Boolean = (n % 2 == 0) 
+
+val someValue = Some(24)
+val someOtherValue = Some(23)
+val noValue = None
+
+noValue.exists(isEven)          // false
+someValue.exists(isEven)        // true
+someOtherValue.exists(isEven)   // false
+```
+
+As shown above, it will evaluate the function provided on the unwrapped `Option` only if it contains something.
+It can be shorter than explicitly unwrapping and applying the check.
 
 ## Back to the beginning
 
