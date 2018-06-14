@@ -14,22 +14,22 @@ When writing a function, I always write the tests first. Why ?
 
 Once I reminded myself these three reasons, I write how I want my function to behave.
 
-Let's say I want to implement the `indexOf` function. It takes a `List[Int]` and an `Int` element and returns the index of the first occurrence of the element in the list.
+Let's say I want to implement the `indexOf` function. It takes a `List[String]` and an `String` element and returns the index of the first occurrence of the element in the list.
 
 ```scala
-def indexOf(element: Int, list: List[Int]): Int
+def indexOf(element: String, list: List[String]): Int
 ```
 
 I can easily write a few cases to demonstrate how I want it to work:
 
 ```scala
-scala> indexOf(3, List(1, 2, 3, 4))
+scala> indexOf("Peyton", List("Bob", "Tom", "Peyton", "Patrick"))
 res0: Int = 2
 
-scala> indexOf(4, List(1, 2, 3, 4))
+scala> indexOf("Patrick", List("Bob", "Tom", "Peyton", "Patrick"))
 res1: Int = 3
 
-scala> indexOf(3, List(1, 2, 3, 3, 3, 4))
+scala> indexOf("Peyton", List("Bob", "Tom", "Peyton", "Peyton", "Peyton", "Patrick"))
 res2: Int = 2
 ```
 
@@ -38,17 +38,17 @@ These cases are the "good cases" where the list in not empty and where there is 
 However, I said earlier that I wanted a "comprehensive specification" for my function. Therefore I have to write test cases for:
 
 ```scala
-scala> indexOf(3, List())
+scala> indexOf("Bob", List())
 res0: Int = ?
 
-scala> indexOf(5, List(1, 2, 3, 4))
+scala> indexOf("Jack", List("Bob", "Tom", "Peyton", "Patrick"))
 res1: Int = ?
 ```
 
 I could have used a trick and return `-1` in these cases like the JavaScript `indexOf` method:
 
 ```javascript
-> [1, 2, 3, 4].indexOf(5)
+> ["Bob", "Tom", "Peyton", "Patrick"].indexOf("Jack")
 -1
 ```
 
@@ -154,25 +154,25 @@ It can be shorter than explicitly unwrapping and applying the check.
 Now we know all about the use of `Option` we can refine our "comprehensive specification" of the `indexOf` function.
 The `indexOf` method will no longer return an `Int` but an `Option[Int]`.
 ```scala
-def indexOf(element: Int, list: List[Int]): Option[Int]
+def indexOf(element: String, list: List[String]): Option[Int]
 ```
 
 and because we need the function to have a meaningful return value when the element is not found in the list, the test cases become:
 
 ```scala
-scala> indexOf(3, List(1, 2, 3, 4))
+scala> indexOf("Peyton", List("Bob", "Tom", "Peyton", "Patrick"))
 res0: Option[Int] = Some(2)
 
-scala> indexOf(4, List(1, 2, 3, 4))
+scala> indexOf("Patrick", List("Bob", "Tom", "Peyton", "Patrick"))
 res1: Option[Int] = Some(3)
 
-scala> indexOf(3, List(1, 2, 3, 3, 3, 4))
+scala> indexOf("Peyton", List("Bob", "Tom", "Peyton", "Peyton", "Peyton", "Patrick"))
 res2: Option[Int] = Some(2)
 
-scala> indexOf(3, List())
+scala> indexOf("Peyton", List())
 res3: Option[Int] = None
 
-scala> indexOf(5, List(1, 2, 3, 4))
+scala> indexOf("Jack", List("Bob", "Tom", "Peyton", "Patrick"))
 res4: Option[Int] = None
 ```
 
@@ -180,8 +180,8 @@ res4: Option[Int] = None
 Each one of the implementations below use the `zipWithIndex` method.
 The `zipWithIndex` method returns a new list containing pairs consisting of all elements of the list paired with their index (see documentation [here](http://www.scala-lang.org/api/current/scala/collection/immutable/List.html)):
 ```scala
-scala> List(23, 11, 18, 10).zipWithIndex
-res0: List[(Int, Int)] = List((23,0), (11,1), (18,2), (10,3))
+scala> List("Bob", "Tom", "Peyton", "Patrick").zipWithIndex
+res0: List[(Int, Int)] = List(("Bob",0), ("Tom",1), ("Peyton",2), ("Patrick",3))
 ```
 
 
@@ -189,7 +189,7 @@ res0: List[(Int, Int)] = List((23,0), (11,1), (18,2), (10,3))
 ### Version 1
 Using the `headOption` function (see documentation [here](http://www.scala-lang.org/api/current/scala/collection/immutable/List.html)) that returns an `Option` wrapping the first element of a list if it exists then using `map` (which preserve the optional nature as explained earlier).
 ```scala
-def indexOf(element: Int, list: List[Int]): Option[Int] = {
+def indexOf(element: String, list: List[String]): Option[Int] = {
   list.zipWithIndex
     .filter(_._1 == element)
     .headOption
@@ -200,7 +200,7 @@ def indexOf(element: Int, list: List[Int]): Option[Int] = {
 ### Version 2
 Using the `find` function (see documentation [here](http://www.scala-lang.org/api/current/scala/collection/immutable/List.html)) that already returns an `Option` then using `map`.
 ```scala
-def indexOf(element: Int, list: List[Int]): Option[Int] = {
+def indexOf(element: String, list: List[String]): Option[Int] = {
   list.zipWithIndex
     .find(_._1 == element)
     .map(_._2)
@@ -210,7 +210,7 @@ def indexOf(element: Int, list: List[Int]): Option[Int] = {
 ### Version 3
 Using pattern matching to check for the element existence.
 ```scala
-def indexOf(element: Int, list: List[Int]): Option[Int] = {
+def indexOf(element: String, list: List[String]): Option[Int] = {
   val filteredElementsWithIndex = list.zipWithIndex
                                       .filter(_._1 == element)
   filteredElementsWithIndex match {
